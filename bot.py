@@ -36,6 +36,8 @@ class Bot(threading.Thread):
         self.owner_nick = owner_nick
         self.wa_phone = wa_phone
         self.log_file = log_file
+        if not contacts.has_key(wa_phone):
+          raise Exception("config error: 'contacts' must include an entry for '%s'"% wa_phone)
         irc_nick = contacts[wa_phone]
         self.irc_nick = irc_nick
         self.wa_password = wa_password
