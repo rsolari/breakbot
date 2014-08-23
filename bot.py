@@ -109,7 +109,7 @@ class Bot(threading.Thread):
                 nick = self.contacts[message.get_nick()]
                 irc_target = self.contacts[message.nick_full.split("@")[0]]
                 for line in lines:
-                    irc_msg = "<%s> %s" %(nick, line)
+                    irc_msg = "[%s] %s" %(nick, line)
                     self.irc_i.send(self.owner_nick, irc_msg)
             else:
                 # directed to someone
@@ -117,18 +117,18 @@ class Bot(threading.Thread):
                     phone = message.get_nick()
                     source_nick = self.contacts[phone]
                     for line in lines:
-                        msg = "<%s> %s" %(source_nick, line)
-                        self.irc_i.send(message.target, msg)
+                        msg = "[%s] %s" %(target, line)
+                        self.irc_i.send(target, msg)
                 except:
                     error("Couldn't relay directed WA msg to IRC")
         else:
             #group message
             for line in lines:
                 try:
-                    msg = "<%s> %s" %(self.contacts[message.get_nick()], line)
+                    msg = "[%s] %s" %(self.contacts[message.get_nick()], line)
                 except:
                     warning("Contact not recognized")
-                    msg = "<%s> %s" %(message.get_nick(), line)
+                    msg = "[%s] %s" %(message.get_nick(), line)
                 try:
                     self.irc_i.send(self.contacts[message.chan], msg)
                 except:
