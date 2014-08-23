@@ -14,7 +14,10 @@ class Message():
             self.kind = kind
             self.nick_full = nick_full
             self.chan = chan
-            self.msg = msg
+            try:
+                self.msg = msg.decode('utf-8')
+            except UnicodeEncodeError:
+                self.msg = msg
             self.target = None
             try:
                 split = msg.split(":", 1)
