@@ -5,6 +5,7 @@ import threading
 from message import Message
 from timestamp import Timestamp
 from catch_them_all import catch_them_all
+import re
 
 import base64
 from Yowsup.connectionmanager import YowsupConnectionManager
@@ -126,8 +127,10 @@ class WAInterface(threading.Thread):
         self.must_run = False
     def send(self, target, text):
         self.wait_connected()
-        self.methodsInterface.call("message_send", (target, text.encode("utf-8")))
-        info((" >>> WA %s: %s" %(target, text)).encode("utf-8"))
+        regex = re.compile("\x0f|\x1f|\x02|\x03(?:\d{1,2}(?:,\d{1,2})?)?", re.UNICODE)
+        escaped_text = regex.sub('', text)
+        self.methodsInterface.call("message_send", (target, escaped_text.encode("utf-8")))
+        info((" >>> WA %s: %s" %(target, escaped_text)).encode("utf-8"))
     @catch_them_all
     def onAuthSuccess(self, username):
         info("Connected WA client (%s)" %username)
