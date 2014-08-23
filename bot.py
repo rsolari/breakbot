@@ -125,7 +125,10 @@ class Bot(threading.Thread):
             #group message
             for line in lines:
                 try:
-                    msg = "[%s] %s" %(self.contacts[message.get_nick()], line)
+                    if (line.startswith("!") | line.startswith(".")):
+                      msg = line
+                    else:
+                      msg = "[%s] %s" %(self.contacts[message.get_nick()], line)
                 except:
                     warning("Contact not recognized")
                     msg = "[%s] %s" %(message.get_nick(), line)
