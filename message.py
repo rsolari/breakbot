@@ -19,14 +19,6 @@ class Message():
             except UnicodeEncodeError:
                 self.msg = msg
             self.target = None
-            try:
-                split = msg.split(":", 1)
-                if len(split) == 2:
-                    if not split[0].endswith(("http","https","image")):
-                        self.target = split[0]
-                        self.msg = split[1].lstrip()
-            except IndexError:
-                pass
         else:
             self.deserialize(serialized_str)
     def get_nick(self):
