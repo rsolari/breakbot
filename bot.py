@@ -101,7 +101,7 @@ class Bot(threading.Thread):
         store_msg(message, self.log_file)
         lines = message.msg.strip().split("\n") #split multiline messages
         info(" <<< WA %s" %message)
-        if message.chan == self.wa_phone:
+        if False:
             #private message
             if message.target is None:
                 # directed to bot itself
