@@ -9,10 +9,17 @@
         "34555555565": "person4",
         "34555555602": "person5"
     },
+    "wa_logins": [
+			{
+				"phone": "34555555125",
+      	"password": "JiO[base 64 encoded pass]AE="
+			},
+			{
+				"phone": "1234567890",
+      	"password": "JiO[base 64 encoded pass]AE="
+			}
+		],
     "config": {
-        "irc_nick": "WA-irc",
-        "wa_phone": "34555555125",
-        "wa_password": "JiO[base 64 encoded pass]AE=",
         "irc_nick": "my_bot",
         "irc_server_name": "irc.freenode.net",
         "irc_server_port": "6667",

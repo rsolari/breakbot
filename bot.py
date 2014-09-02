@@ -5,7 +5,7 @@
 import threading
 import time
 from irc_bot import IRCInterface
-from wa_bot import WAInterface
+from wa_mutex import WAMutexInterface
 from log import info, error, warning
 from catch_them_all import catch_them_all
 import traceback
@@ -28,19 +28,18 @@ def channels_from_contacts(contacts):
     return channels
 
 class Bot(threading.Thread):
-    def __init__(self, wa_phone, wa_password, contacts, irc_server, irc_port, owner_nick, irc_nick, log_file):
+    def __init__(self, wa_logins, contacts, irc_server, irc_port, owner_nick, irc_nick, log_file):
         threading.Thread.__init__(self)
         self.must_run = True
         self.irc_server = irc_server
         self.irc_port = irc_port
         self.owner_nick = owner_nick
-        self.wa_phone = wa_phone
         self.log_file = log_file
         self.irc_nick = irc_nick
-        self.wa_password = wa_password
         self.contacts = contacts
         self.irc_i = IRCInterface(self.irc_server, self.irc_port, self.irc_nick, channels_from_contacts(self.contacts), self.irc_msg_received, self.stop)
-        self.wa_i = WAInterface(self.wa_phone, self.wa_password, self.wa_msg_received, self.stop)
+        self.wa_m = WAMutexInterface(wa_logins, self.wa_msg_received, self.stop, self.wa_msg_ignored, self.stop)
+
     @catch_them_all
     def run(self):
         try:
@@ -48,9 +47,9 @@ class Bot(threading.Thread):
             info("Connecting IRC client (%s@%s:%s)" %(self.irc_nick, self.irc_server, self.irc_port))
             self.irc_i.start()
             self.irc_i.wait_connected()
-            info("Connecting WA client (%s)" %self.wa_phone)
-            self.wa_i.start()
-            self.wa_i.wait_connected()
+            info("Connecting WA clients")
+            self.wa_m.start()
+            self.wa_m.wait_connected()
             info("Bot ready.")
         except:
             info("Main loop closing")
@@ -59,7 +58,7 @@ class Bot(threading.Thread):
         info("Bot stopping...")
         self.must_run = False
         self.irc_i.stop()
-        self.wa_i.stop()
+        self.wa_m.stop()
 
     def get_wa_id_from_name(self, contacts, name):
         for k,v in contacts.items():
@@ -85,14 +84,17 @@ class Bot(threading.Thread):
                     warning("Phone number '%s' not found in contact list. Trying to send anyway..." %message.target)
             wa_target += "@s.whatsapp.net"
             msg = "<%s> %s" %(message.get_nick(), message.msg)
-            self.wa_i.send(wa_target, msg)
+            self.wa_m.send(wa_target, msg)
         else:
             msg = "<%s> %s" %(message.get_nick(), message.msg)
             try:
                 group = self.get_wa_id_from_name(self.contacts, message.chan)
-                self.wa_i.send(group, msg)
+                self.wa_m.send(group, msg)
             except Exception, e:
                 error("Cannot send message to channel %s: %s" %(message.chan, e))
+
+    def wa_msg_ignored(self, message):
+        ""
 
     @catch_them_all
     def wa_msg_received(self, message):
@@ -139,12 +141,13 @@ with open("config.json", "r") as f:
     config = json.loads(f.read())
 contacts = config["contacts"]
 cfg = config["config"]
+wa_logins = config["wa_logins"]
 
 info("%s contacts loaded from configuration file" %len(contacts))
 with open("config.json.bak", "w") as f:
     json.dump(config, f, indent=4)
 
-b = Bot(cfg["wa_phone"], cfg["wa_password"], contacts, cfg["irc_server_name"], int(cfg["irc_server_port"]), cfg["bot_owner_nick"], cfg["log_file"])
+b = Bot(wa_logins, contacts, cfg["irc_server_name"], int(cfg["irc_server_port"]), cfg["bot_owner_nick"], cfg["irc_nick"], cfg["log_file"])
 try:
     b.start()
     while b.must_run:
