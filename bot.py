@@ -28,7 +28,7 @@ def channels_from_contacts(contacts):
     return channels
 
 class Bot(threading.Thread):
-    def __init__(self, wa_phone, wa_password, contacts, irc_server, irc_port, owner_nick, log_file):
+    def __init__(self, wa_phone, wa_password, contacts, irc_server, irc_port, owner_nick, irc_nick, log_file):
         threading.Thread.__init__(self)
         self.must_run = True
         self.irc_server = irc_server
@@ -36,9 +36,6 @@ class Bot(threading.Thread):
         self.owner_nick = owner_nick
         self.wa_phone = wa_phone
         self.log_file = log_file
-        if not contacts.has_key(wa_phone):
-          raise Exception("config error: 'contacts' must include an entry for '%s'"% wa_phone)
-        irc_nick = contacts[wa_phone]
         self.irc_nick = irc_nick
         self.wa_password = wa_password
         self.contacts = contacts
